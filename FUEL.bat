@@ -1,0 +1,1 @@
+C:\Users\Vadym\AppData\Local\Programs\Python\Python38-32\python.exe F:\Python\tanks\excel.py
