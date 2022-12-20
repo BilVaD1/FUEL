@@ -12,7 +12,7 @@ class Tasks:
         self.wb = load_workbook('./data/Book1.xlsx')
 
     def createGraph(self, x, y, z, z2, tankName, sounding, tanks_for_colors):
-        colors = ["Blue", "Green", "Cyan", "Magenta", "Yellow", "Black", "Pink", "Purple", "Orange", "Gray", "Brown", "Beige"]
+        colors = ["Green", "Cyan", "Magenta", "Yellow", "Black", "Pink", "Purple", "Orange", "Gray", "Brown", "Beige"]
         if len(tanks_for_colors) == 1:
             color="red"
         elif len(tanks_for_colors) > 1:
