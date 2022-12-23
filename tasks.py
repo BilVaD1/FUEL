@@ -4,6 +4,9 @@ from openpyxl import load_workbook
 import matplotlib.pyplot as plt  # Библиотека для работы с графиками
 import numpy as np
 
+from summary import Summary
+
+
 
 class Tasks:
 
@@ -108,9 +111,12 @@ class Tasks:
                 y.append(y1)
             else:
                 continue
+
+        
         k = sheet.cell(row=2, column=7).value  # Получаем значение корректирующего фактора из таблицы
 
         z_max = x[-1]  # Находим последнее значение списка глубины, чтобы оптимизировать работу на всех страницах Екселя
+        V_max = y[-1]
 
         z = 0  # Значение на графике
 
@@ -119,6 +125,7 @@ class Tasks:
             answer_V['text'] = f'You have {"{0:.3f}".format(z)} m3'  # {"{0:.3f}".format(z)} use only 2 numbers after the dot in the z2
             # t = k * z  # Вычисленние тонн
             self.writeValuesToExcel(sheet, sounding_number, z)
+            Summary().writeValuesToExcel(tank, V_max, z)
             '''Mass calculation is an optional function, the customer can use it or not.
                So if fields are empty or one of them is not specified then the calculation will not be worked'''
             if calcMass:
