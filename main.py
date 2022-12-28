@@ -2,15 +2,14 @@ import os
 import time
 from tkinter import *
 from tkinter import ttk
+import tkinter as tk
 from components.summary_tab import SummaryTab
 from PIL import Image, ImageTk
 
 from tasks import Tasks
+from summary import Summary
 
-while 1:
-    os.system("TASKKILL /F /IM Excel.exe")  # Stop Excel if it is running
-    time.sleep(0)
-    break
+
 
 # Dropdown menu options
 options = [
@@ -35,10 +34,11 @@ options = [
 
 tanks_for_colors = [] # This is variable for realize the changing of color on each curve of the graphic, it keeps only unique values
 
+def stop_excel():
+    os.system("TASKKILL /F /IM Excel.exe")  # Stop Excel if it is running
+    time.sleep(0)
 
 '''Create functions that will return values from Entry fields'''
-
-
 def return_tank_name():
     content = clicked.get()
     return content
@@ -56,32 +56,57 @@ def return_temperature():
     content = Temperature_entry.get()
     return content
 
+'''Function for calling class Helpers()'''
+def task_tab1():
+    stop_excel()
+    tasks = Tasks(answer_mass, answer_m3, tanks_for_colors)
+    return tasks.task1(return_sounding(), return_tank_name(), return_density(), return_temperature())
+
+
+'''Functions to hide or show rows'''
+def show_Mass():
+    Density_label.grid(row=3, column=0, padx=10, pady=30, sticky=W)
+    Density_entry.grid(row=3, column=2, columnspan=2, sticky=W + E)
+    Temperature_label.grid(row=4, column=0, padx=10, pady=10, sticky=W)
+    Temperature_entry.grid(row=4, column=2, columnspan=2, sticky=W + E)
+    answer_mass.grid(row=5, column=2, sticky=W + E, pady=25)
+
+def hide_Mass():
+    Density_label.grid_forget()
+    Density_entry.grid_forget()
+    Temperature_label.grid_forget()
+    Temperature_entry.grid_forget()
+    answer_mass.grid_forget()
+
+'''Function to handle the checkbox value'''
+def checkClicked():
+    if checkbutton_var.get():
+        show_Mass()
+    else:
+        hide_Mass()
+
 
 root = Tk()
 root.title('Tanks')
 root.geometry('700x400+700+300')
 root.resizable(False, False)
-#root.config(bg=r'.\\img\\20200106_115612.jpg')
 root.iconbitmap(r".\\img\ship_14716.ico")
 
-
+'''Create tabs'''
 # Create the Notebook widget
 nb = ttk.Notebook(root)
-
 # Pack the Notebook widget to make it visible
 nb.pack(expand=1, fill='both')
-
 # Create the first tab
 tab1 = ttk.Frame(nb)
-
 # Create the second tab
 tab2 = ttk.Frame(nb)
-
 # Add the tabs to the Notebook widget
 nb.add(tab1, text='Tank')
 nb.add(tab2, text='Summary')
 
 
+"""Tab1"""
 image = Image.open(".\img\\20200106_115612.png")
 image1 = image.resize((700, 400), Image.ANTIALIAS)
 background_image = ImageTk.PhotoImage(image1)
@@ -115,37 +140,110 @@ answer_m3 = Label(tab1, padx=5, text='There will be the Volume in m3')
 answer_m3.grid(row=2, column=2, sticky=E, pady=15, padx=60)
 
 Density_label = Label(tab1, text='Please write the density of fuel at 15 celsius:')
-Density_label.grid(row=3, column=0, padx=10, pady=30, sticky=W)
 
 Density_entry = Entry(tab1)
-Density_entry.grid(row=3, column=2, columnspan=2, sticky=W + E)
 
 Temperature_label = Label(tab1, text='Please write the current temperature of fuel:')
-Temperature_label.grid(row=4, column=0, padx=10, pady=10, sticky=W)
 
 Temperature_entry = Entry(tab1)
-Temperature_entry.grid(row=4, column=2, columnspan=2, sticky=W + E)
 
 answer_mass = Label(tab1, padx=5, text='There will be the mass of oil in "t"')
-answer_mass.grid(row=5, column=2, sticky=W + E, pady=25)
 
-
-'''Function for calling class Helpers()'''
-def task2():
-    tasks = Tasks()
-    return tasks.task1(return_sounding(), return_tank_name(), return_density(), return_temperature(), answer_mass, answer_m3, tanks_for_colors)
-
-
-Start = Button(tab1, command=task2, text='Start')
+Start = Button(tab1, command=task_tab1, text='Start')
 Start.grid(row=2, column=0, padx=10, pady=10, sticky=W + E)
+
+checkbutton = tk.Checkbutton(tab1, text="Calculate mass", command=checkClicked)
+# Create an IntVar to store the state of the checkbox
+checkbutton_var = tk.IntVar()
+
+# Set the checkbox to use the IntVar as its variable
+checkbutton.config(variable=checkbutton_var)
+checkbutton.grid(row=0, column=0, padx=10, pady=10, sticky=E)
+
+
+
 
 
 """Tab2"""
+
+def task_tab2():
+    Notification_Block['text'] = 'Notification: All ok.'
+    Notification_Block['bg'] = 'green'
+    Notification_Block.grid(row=8, column=1, padx=35, pady=35, sticky=W)
+    #Show the labels
+    #Show_results() 
+    # Get the indices of the selected items
+    selected_indices = listbox.curselection()
+
+    # Get the selected options from the options list
+    selected_options = [options[i] for i in selected_indices]
+    summary = Summary(tanks_capacity, current_capacity, remaining_capacity, answer_tanks_name, Notification_Block)
+    summary.foundSelectedValues(selected_options)
+
+    if Notification_Block.cget("bg") != "red" and len(selected_options) > 0:
+        Show_results() 
+    elif len(selected_options) == 0:
+        Notification_Block['text'] = 'Notification: Choose the tank(s)'
+        Notification_Block['bg'] = 'orange'
+        reset_results()
+    else:
+        reset_results()
+
+
+def Show_results():
+
+    answer_tanks_name.grid(row=2, column=1, padx=35, sticky=W)
+    tanks_capacity.grid(row=3, column=1, padx=35, sticky=W)
+    current_capacity.grid(row=4, column=1, padx=35, sticky=W)
+    remaining_capacity.grid(row=5, column=1, padx=35, sticky=W)
+
+def reset_results():
+    answer_tanks_name.grid_forget()
+    tanks_capacity.grid_forget()
+    current_capacity.grid_forget()
+    remaining_capacity.grid_forget()
+
+def open_excel():
+    # Generate report
+    Summary().generate_report()
+    # Open report 
+    os.system('start "excel" "reports\Summary_report_2022-12-28.xlsx"')
+
+
+
 image2 = Image.open(".\img\\20200106_115612.png")
 image2 = image2.resize((700, 400), Image.ANTIALIAS)
 background_image2 = ImageTk.PhotoImage(image2)
 background_label2 = Label(tab2, image=background_image2)
 background_label2.place(x=0, y=0, relwidth=1, relheight=1)
 
+# Create the Listbox widget
+listbox = tk.Listbox(tab2, selectmode='multiple')
+
+# Add options to the Listbox
+for option in options:
+    listbox.insert(tk.END, option)
+
+# Create a button to toggle the visibility of the Listbox
+listbox.grid(row=1, column=3, sticky=N, pady=10, padx=35) # Use the show by default
+button_hide = tk.Button(tab2, text="Show/Hide Options", 
+command=lambda: listbox.grid_forget() if listbox.winfo_ismapped() else listbox.grid(row=1, column=3, sticky=N, pady=10, padx=35))
+
+# Place the button and the Listbox in the main window
+button_hide.grid(row=1, column=2, sticky=N + W, pady=35, padx=35)
+
+button_summary = tk.Button(tab2, text="Show result", command=task_tab2)
+button_summary.grid(row=1, column=1, sticky=N + W, pady=35, padx=35)
+
+answer_tanks_name = Label(tab2, text='Tank(s) name(s): ')
+tanks_capacity = Label(tab2, text='Tank(s) capacity: ')
+current_capacity = Label(tab2, text='Current capacity: ')
+remaining_capacity = Label(tab2, text='Remaining capacity: ')
+
+Notification_Block = Label(tab2, text='Notification: ', bg='yellow')
+Notification_Block.grid(row=8, column=1, padx=35, pady=35, sticky=W)
+
+button_reprot = tk.Button(tab2, text="Generate/Open Report", command=open_excel)
+button_reprot.grid(row=8, column=3, sticky=W, pady=35, padx=35)
 
 root.mainloop()
