@@ -43,9 +43,9 @@ class Summary:
 
 
     def writeValuesToUI(self, total, current, remaining, tanks):
-        self.tanks_capacity['text'] = f'Tank(s) capacity: {str(total)}'
-        self.current_capacity['text'] = f'Current capacity: {str(current)}'
-        self.remaining_capacity['text'] = f'Remaining capacity: {str(remaining)}'
+        self.tanks_capacity['text'] = f'Tank(s) capacity: {str(total)} m3'
+        self.current_capacity['text'] = f'Current capacity: {str(current)} m3'
+        self.remaining_capacity['text'] = f'Remaining capacity: {str(remaining)} m3'
         self.tank_names['text'] = f'Tank(s) name(s): {tanks}'
 
     #Compare the only dates(yy.mm.dd) from the data(yy.mm.dd.hh.mm.ss)
@@ -100,4 +100,5 @@ class Summary:
         
         self.writeValuesToUI(sum(total), sum(current), sum(remaining), tanks)
         # Return self.verify_Dates(dates) to handle the Warning_Block in the parent component
-        return self.verify_Dates(dates)
+        return self.verify_Dates(dates), sum(remaining)
+

@@ -44,8 +44,9 @@ class Tasks:
         return correctedDensity
     
     def mass(self, density, currentTemperature, volume):
-        mass = self.temperatureCorrectedDensity(density, currentTemperature) * volume
-        return mass
+        mass_v = self.temperatureCorrectedDensity(density, currentTemperature) * volume
+        mass_t = mass_v / 1000
+        return mass_t
 
     def displayMass(self, density, currentTemperature, z, sheet):
         currentMass = self.mass(density, currentTemperature, z)
@@ -132,7 +133,7 @@ class Tasks:
             '''Mass calculation is an optional function, the customer can use it or not.
                So if fields are empty or one of them is not specified then the calculation will not be worked'''
             if calcMass:
-                self.displayMass(density, currentTemperature, z, self.answer_mass, sheet)
+                self.displayMass(density, currentTemperature, z, sheet)
             '''Add only unique tanks'''
             if tank not in self.tanks_for_colors:
                 self.tanks_for_colors.append(tank)

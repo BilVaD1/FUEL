@@ -138,11 +138,11 @@ answer_m3.grid(row=2, column=2, sticky=W)
 answer_m3 = Label(tab1, padx=5, text='There will be the Volume in m3')
 answer_m3.grid(row=2, column=2, sticky=E, pady=15, padx=60)
 
-Density_label = Label(tab1, text='Please write the density of fuel at 15 celsius:')
+Density_label = Label(tab1, text='Write the density(kg/m3) of fuel at 15 celsius:')
 
 Density_entry = Entry(tab1)
 
-Temperature_label = Label(tab1, text='Please write the current temperature of fuel:')
+Temperature_label = Label(tab1, text='Write the current temperature(Celsius) of fuel:')
 
 Temperature_entry = Entry(tab1)
 
@@ -165,10 +165,34 @@ checkbutton.grid(row=0, column=0, padx=10, pady=10, sticky=E)
 
 """Tab2"""
 
+'''Functions to hide or show rows'''
+def show_Bunkering():
+    Density_bunker.grid(row=2, column=3, padx=10, pady=10, sticky=W + N)
+    Density_bunker_entry.grid(row=2, column=4, columnspan=2, pady=10, sticky=W + N)
+    Temperature_bunker.grid(row=2, column=3, padx=10, pady=110, sticky=W)
+    Temperature_bunker_entry.grid(row=2, column=4, columnspan=2, pady=110, sticky=W)
+    button_Bunker.grid(row=2, column=3, sticky=W + S, pady=75, padx=10)
+
+
+def hide_Bunkering():
+    Density_bunker.grid_forget()
+    Density_bunker_entry.grid_forget()
+    Temperature_bunker.grid_forget()
+    Temperature_bunker_entry.grid_forget()
+    button_Bunker.grid_forget()
+    bulk_answer_label.grid_forget()
+
+'''Function to handle the checkbox value'''
+def checkClicked_tab2():
+    if checkbutton_var_tab2.get():
+        show_Bunkering()
+    else:
+        hide_Bunkering()
+
 def task_tab2():
     Notification_Block['text'] = 'Notification: All ok.'
     Notification_Block['bg'] = 'green'
-    Notification_Block.grid(row=8, column=1, padx=100, pady=10, sticky=W + S)
+    Notification_Block.grid(row=8, column=1, padx=20, pady=10, sticky=W + S)
     #Show the labels
     #Show_results() 
     # Get the indices of the selected items
@@ -182,8 +206,8 @@ def task_tab2():
     dates = summary.foundSelectedValues(selected_options)
 
     if Notification_Block.cget("bg") != "red" and len(selected_options) > 0:
-        if dates:
-            Warning_Block.grid(row=9, column=1, padx=100, sticky=W) # Display the warning label
+        if dates[0]:
+            Warning_Block.grid(row=9, column=1, padx=20, sticky=W) # Display the warning label
         else:
             Warning_Block.grid_forget() # Remove the warning label
         Show_results()
@@ -196,13 +220,15 @@ def task_tab2():
         Warning_Block.grid(row=9, column=1, padx=100, sticky=W) # Display the warning label
         reset_results() # Remove the results
 
+    return dates[1]
+
 
 def Show_results():
 
-    answer_tanks_name.grid(row=3, column=1, padx=100, sticky=W)
-    tanks_capacity.grid(row=4, column=1, padx=100, sticky=W)
-    current_capacity.grid(row=5, column=1, padx=100, sticky=W)
-    remaining_capacity.grid(row=6, column=1, padx=100, sticky=W)
+    answer_tanks_name.grid(row=4, column=1, padx=100, sticky=W)
+    tanks_capacity.grid(row=5, column=1, padx=100, sticky=W)
+    current_capacity.grid(row=6, column=1, padx=100, sticky=W)
+    remaining_capacity.grid(row=7, column=1, padx=100, sticky=W)
 
 def reset_results():
     answer_tanks_name.grid_forget()
@@ -216,15 +242,45 @@ def open_excel():
     # Open report 
     os.system('start "excel" "reports\Summary_report_2022-12-28.xlsx"')
 
+def caclBunk():
+    # Get the indices of the selected items
+    selected_indices = listbox.curselection()
+
+    # Get the selected options from the options list
+    selected_options = [options[i] for i in selected_indices]
+
+    density_enter = Density_bunker_entry.get()
+    temp_enter = Temperature_bunker_entry.get()
+
+    if density_enter == '' or temp_enter == '':
+        bulk_answer_label['text'] = f'Please specify the density & temp.'
+        bulk_answer_label['bg'] = 'orange'
+        bulk_answer_label.grid(row=3, column=3, sticky=E + S, padx=10)
+    elif len(selected_options) == 0:
+        bulk_answer_label['text'] = f'Choose the tank(s)'
+        bulk_answer_label['bg'] = 'orange'
+        bulk_answer_label.grid(row=3, column=3, sticky=E + S, padx=10)
+    else:
+        density = float(density_enter)
+        temp = float(temp_enter)
+        volume = float(task_tab2())
+
+        tasks = Tasks()
+        answer = tasks.mass(density, temp, volume)
+        bulk_answer_label['text'] = f'Tank(s) can hold {answer} tons'
+        bulk_answer_label['bg'] = 'pink'
+        bulk_answer_label.grid(row=3, column=3, sticky=E + S, padx=10)
 
 
-image2 = Image.open(".\img\\20200106_115612.png")
+
+
+image2 = Image.open(".\img\\1638890321103.png")
 image2 = image2.resize((1000, 600), Image.Resampling.LANCZOS)
 background_image2 = ImageTk.PhotoImage(image2)
 background_label2 = Label(tab2, image=background_image2)
 background_label2.place(x=0, y=0, relwidth=1, relheight=1)
 
-# Create the Listbox widget
+'''Create the Listbox widget'''
 listbox = tk.Listbox(tab2, selectmode='multiple')
 
 # Add options to the Listbox
@@ -232,26 +288,52 @@ for option in options:
     listbox.insert(tk.END, option)
 
 # Create a button to toggle the visibility of the Listbox
-listbox.grid(row=2, column=2, sticky=N, pady=10, padx=35) # Use the show by default
-button_hide = tk.Button(tab2, text="Show/Hide Options", 
-command=lambda: listbox.grid_forget() if listbox.winfo_ismapped() else listbox.grid(row=2, column=2, sticky=N, pady=10, padx=35))
+listbox.grid(row=2, column=2, sticky=N, pady=10, padx=20) # Use the show by default
 
-# Place the button and the Listbox in the main window
-button_hide.grid(row=1, column=2, sticky=N + W, pady=35, padx=35)
+'''Button to hide/show the multiple menu'''
+button_hide = tk.Button(tab2, text="Show/Hide Tanks", 
+command=lambda: listbox.grid_forget() if listbox.winfo_ismapped() else listbox.grid(row=2, column=2, sticky=N, pady=10, padx=20))
+button_hide.grid(row=1, column=2, sticky=N + W, pady=35)
 
+'''Button to calculate the answer block'''
 button_summary = tk.Button(tab2, text="Show result", command=task_tab2)
 button_summary.grid(row=1, column=1, sticky=N + W, pady=35, padx=100)
 
+'''Answer block with results'''
 answer_tanks_name = Label(tab2, text='Tank(s) name(s): ')
 tanks_capacity = Label(tab2, text='Tank(s) capacity: ')
 current_capacity = Label(tab2, text='Current capacity: ')
 remaining_capacity = Label(tab2, text='Remaining capacity: ')
 
+'''Notifications block'''
 Notification_Block = Label(tab2, text='Notification: ', bg='yellow')
-
 Warning_Block = Label(tab2, text='Warning: ', bg='yellow')
 
-button_reprot = tk.Button(tab2, text="Generate/Open Report", command=open_excel)
-button_reprot.grid(row=8, column=2, sticky=W, padx=35)
+'''Button to generate report'''
+button_report = tk.Button(tab2, text="Generate/Open Report", command=open_excel, bg='green')
+button_report.grid(row=2, column=1, sticky=W + N, padx=100)
+
+'''Checkbutton to show/hide the bunkering block'''
+checkbutton_tab2 = tk.Checkbutton(tab2, text="Enable Bunker", command=checkClicked_tab2)
+# Create an IntVar to store the state of the checkbox
+checkbutton_var_tab2 = tk.IntVar()
+
+# Set the checkbox to use the IntVar as its variable
+checkbutton_tab2.config(variable=checkbutton_var_tab2)
+checkbutton_tab2.grid(row=1, column=3, padx=10, pady=10, sticky=W)
+
+'''Block to calculate the bunkering fuel/oil'''
+Density_bunker = Label(tab2, text='Density(kg/m3) of fuel at 15 celsius:')
+
+Density_bunker_entry = Entry(tab2, bg='grey')
+
+Temperature_bunker = Label(tab2, text='Temperature of bunkering fuel:')
+
+Temperature_bunker_entry = Entry(tab2, bg='grey')
+
+button_Bunker = tk.Button(tab2, text="Calc Bunker", bg='purple', command=caclBunk)
+
+bulk_answer_label = Label(tab2, text='')
+
 
 root.mainloop()
