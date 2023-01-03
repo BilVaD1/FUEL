@@ -7,5 +7,4 @@
 <h3>How to install and start the application?</h3>
 
 1. Clone or download an app
-2. Open the command line within the folder
-3. Launch the Start.bat file
+2. Launch the Start.bat file
